@@ -1,0 +1,139 @@
+Khoi Nguyen
+#########
+Assignment 3
+
+First I had to get the Correutil 8.29, the keyring
+and the signature using the commands:
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz
+wget https://ftp.gnu.org/gnu/gnu-keyring.gpg
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz.sig
+
+To verify the package, I ran the command:
+gpg --verify --keyring ./gnu-keyring.gpg coreutils-8.29.tar.xz.sig
+
+The output is:
+gpg: Signature made Wed 27 Dec 2017 10:29:05 AM PST using RSA key ID 306037D9
+gpg: Good signature from "Pádraig Brady <P@draigBrady.com>"
+gpg:                 aka "Pádraig Brady <pbrady@redhat.com>"
+gpg:                 aka "Pádraig Brady <pixelbeat@gnu.org>"
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 6C37 DC12 121A 5006 BC1D  B804 DF6F D971 3060 37D9
+
+The verification gave one warning of not certified with a 
+trusted signature. This is because there is no indication
+that the signature belongs to the owner. The keys are either
+marked as not trusted or the keys are a forgery.
+
+Next, to unzip the tar, I used the command:
+tar -xf coreutils-8.29.tar.xz
+-xf means to extrac all files from the tar file
+
+I then made a directory named coreutilsInstall inside the
+the folder coreutils-8.29 as a location to install:
+cd coreutils-8.29
+mkdir coreutilsInstall 
+
+To learn how to install, I read the INSTALL file:
+nano INSTALL
+
+This makes the output of the configure script
+go into the temporary directory
+./configure --prefix=$pwd/coreutilsInstall
+where $pwd=/u/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/
+
+To compile:
+make
+
+To install:
+make install
+
+To test the behavior of the of CoreuitilsInstall
+I ran the commands:
+cd coreutilsInstall (to go into the temp directory)
+./bin/ls -aA
+This produces a list of all of the contents of
+coreutils-8.29, including '.' and '..'. This reproduces 
+the bug.
+
+Next, to bring the patch over, I copied and pasted
+the patch from the assingment into patch.diff using
+the command.
+cd .. ( to go back to the untarred directory)
+vim patch_file (copy/paste/save)
+
+To apply the patch, I used the command:
+patch -p1 < patch_file
+This modifies the current package using the diff file.
+This output:
+patching file NEWS
+Hunk #1 FAILED at 4.
+1 out of 1 hunk FAILED -- saving rejects to file NEWS.rej
+patching file src/ls.c
+Hunk #1 succeeded at 1900 (offset -3 lines).
+patching file tests/local.mk
+patching file tests/ls/a-option.sh
+
+This is okay because NEWS does not affect the performance after applying the 
+patch. I also used p1 to remove the initial slash.
+
+To recompile, I used the command:
+make
+
+Make produced the following commands:
+make  all-recursive
+make[1]: Entering directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29'
+Making all in po
+make[2]: Entering directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/po'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/po'
+Making all in .
+make[2]: Entering directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29'
+  CC       src/ls.o
+  CCLD     src/dir
+  CCLD     src/ls
+  CCLD     src/vdir
+  GEN      man/dir.1
+  GEN      man/ls.1
+  GEN      man/vdir.1
+make[2]: Leaving directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29'
+Making all in gnulib-tests
+make[2]: Entering directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/gnulib-tests'
+make  all-recursive
+make[3]: Entering directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/gnulib-tests'
+Making all in .
+make[4]: Entering directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/gnulib-tests'
+make[4]: Nothing to be done for `all-am'.
+make[4]: Leaving directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/gnulib-tests'
+make[3]: Leaving directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/gnulib-tests'
+make[2]: Leaving directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29/gnulib-tests'
+make[1]: Leaving directory 
+	`/w/home.11/ce/ugrad/nguyenk/cs35l/assign3/coreutils-8.29'
+
+These commands go into the directory coreutils-8.29 and edits the contents 
+based on the diff file. If a file in diff had a modification, then the 
+command goes into the file and edits. After applying the modifications, the 
+make command recompiles the package.
+
+Finally, to test the modified package, I ran:
+cd coreutilsInstall
+./bin/ls -aA
+(then)
+cd ..
+./src/ls -aA
+
+By running both, we can see that the modified version does not
+print out '.' and '..' while the unmodified version continues
+to print out '.' and '..'
+

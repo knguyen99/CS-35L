@@ -1,0 +1,7 @@
+what ive done:
+
+added flag for f option
+finished with checking number of arguments
+finished decoder
+added filestat struct
+first error in reading file

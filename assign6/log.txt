@@ -1,0 +1,76 @@
+Khoi Nguyen 
+804993073
+log.txt
+
+To prepend the path:
+export PATH=/usr/local/cs/bin:$PATH
+
+
+First, to check the version of sort that I am currently using
+I ran the command:
+sort --version
+
+The output was:
+sort (GNU coreutils) 8.22
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Mike Haertel and Paul Eggert.
+
+Using the given command from the TA, I read about
+what od does witht the options attached:
+man od
+
+Next, generate a file with 2^24 random floats:
+od -An -t fF -N 67108864 < /dev/urandom | tr -s ' ' '\n' | sed '/^$/d' > rand.txt
+
+-An suppresses addresses in the output file, -t fF selects floats specifically
+-N 67108864 specifies the amount of bytes to limit the dump to, which is 
+4 bytes per float * 16777216 floats. The tr command converts spaces to new lines
+and the sed command removes empty lines.
+
+Now that the file is created, we can time the sort command:
+
+time -p sort -g rand.txt > /dev/null
+
+output:
+real 49.71
+user 253.11
+sys 1.48
+
+time -p sort -g --parallel=1 rand.txt > /dev/null
+
+output:
+real 261.75
+user 259.74
+sys 1.18
+
+
+time -p sort -g --parallel=2 rand.txt > /dev/null
+
+output:
+real 136.85
+user 258.77
+sys 0.99
+
+time -p sort -g --parallel=4 rand.txt > /dev/null
+
+output:
+real 76.97
+user 256.26
+sys 1.20
+
+time -p sort -g --parallel=8 rand.txt > /dev/null
+
+output:
+real 47.98
+user 250.95
+sys 1.35
+
+
+It seems like without specifying the number of 
+parallel threads, the system defaults to 8 threads.
+The more threads there are, the faster the program
+runs because actions are taken simoultaneously.

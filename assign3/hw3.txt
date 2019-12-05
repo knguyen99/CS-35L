@@ -1,0 +1,45 @@
+Khoi Nguyen
+#########
+hw3.txt
+
+1) The program now improves the performance because -A overrides -a 
+according to the switch statement in the patch file. The switch no longer
+checks if ignore_mode ==  IGNORE_DEFAULT, and thus directy changes
+ignore_mode to '.' and '..' Without this if statement, the program now 
+runs faster and with the desired output.
+
+2) This patch does not seem to introduce any new problems. The modified 
+ls command does not modify either of the '.' or '..' directories.
+Furthermore, these directories exist in all directories despite being
+hidden, thus are assumed to always exist. One problem that could occur
+is if people were relying on the premodified ls command and needed -a
+to override -A. If a script relying on the old ls command is run, 
+there is a possibility of an unexpected outcome.
+
+3) When randline.py is invoked on /dev/null, this is outputted:
+Traceback (most recent call last):
+  File "./randline.py", line 70, in <module>
+    main()
+  File "./randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "./randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]  
+	# raises IndexError if seq is empty
+IndexError: list index out of range
+
+This error is an index error because the script attempts to retrieve a random
+line from the file, however because the file is empty, the the seq is empty
+and trying to access something that is empty not possible.
+
+4) When using Python 3, there is a syntax error in the script. The output
+is :
+  File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+
+This is because in Python 3, IOError is merged into OSError, thus 
+the line must be changed to "except OSError as err:" This would
+then be syntactically correct to match Python 3 syntax.

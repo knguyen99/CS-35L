@@ -1,0 +1,6 @@
+file1=$1
+file2=$2
+
+compare=$(` cmp -s -- $file1 $file2` )
+
+echo "$compare"

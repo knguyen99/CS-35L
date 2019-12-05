@@ -1,0 +1,49 @@
+Khoi Nguyen
+804993073
+sfrob.txt
+
+This is the results of comparing sfrob, sfrobu, sfrobs, sfrobu -f, and sfrobs -f.
+
+To find out how many comparisons are made, I editted the sfrob compare functions
+so that it keeps track of how many comparisons are needed.
+
+Lines		Comparisons
+10		230
+100		3789
+1000		53031
+100000		521345
+
+According to my graphing calculator, this correlation is fairly linear. Although
+not exact, the equation that the comparisons follows is: Y = 52.18*X - 324.7.
+
+Time comparisons
+						10 lines
+		sfrob		sfrobu		sfrobs		sforbs -f 	sfrobu -f
+real		.005s		.007s		.014s		.013s		.005s
+user 		.001s		.000s		.004s		.004s		.001s
+system		.003s		.006s		.016s		.015s		.004s	
+		
+						
+						100 lines
+                sfrob	        sfrobu          sfrobs	        sforbs -f 	sfrobu -f
+real		.007s		.007s		.018s		.013s		.007s
+user 		.003s		.001s		.004s		.006s		.003s
+system		.004s		.005s		.020s		.014s		.003s
+
+
+						1000 lines
+                sfrob	        sfrobu          sfrobs	        sforbs -f 	sfrobu -f
+real		.018s		.022s		.018s		.022s		.028s
+user 		.010s		.008s		.004s		.010s		.012s
+system		.007s		.013s		.020s		.017s		.013s
+
+
+
+						10000 lines
+                sfrob           sfrobu          sfrobs          sforbs -f        sfrobu -f
+real	        .106s           .058s           .047s		.058s		.176s
+user 	        .069s           .047s           .026s		.045s		.095s
+system	        .032            .010s           .030s		.025s		.074s
+
+From the data, you can see that with lower amount of lines, sfrobu -f performs better than most,
+however sfrobs is more consistent with low times. 

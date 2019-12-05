@@ -1,0 +1,80 @@
+Khoi Nguyen
+#########
+CS 35L
+Assignment 1
+
+1. The command "man -k" followed by desired search word prints all commands with that specific word in their man page.
+
+2. The command "mv" is located in /usr/bin/mv and the command "sh" is located in /usr/bin/sh. To find the location I used:
+       	       man whereis ( to find out what whereis outputs since we touched upon in in class)
+	       whereis mv
+	       whereis sh.
+
+3. The three commands that are two characters and end in r are "pr" and "tr"."ar" is used to create, modify, and extract from archives. "pr" is used to convert text files for printing and "tr" is used to translate or delete characters.
+   To find these commands, i used;
+      	   	 man find (to understand what parameters to use with find to find specific files)
+
+		 find /usr/local/cs/bin -executable -name ?r (specifiying path name, that is an executeable file, and that its name has one character that as anything and the second character r)
+		  man ar (to learn what ar does)
+		  man pr (to learn what pr does)
+		  man tr (to learn what tr does)
+
+4. The file /etc/alternatives/emacs is actually executed when /usr/bin/emacs is executed. The commands I used:
+       	    	man readlink
+		readlink /usr/bin/emacs
+
+5. The version of /usr/bin/gcc is 4.8.5 and the plain gcc version is 8.2.0. The two are different because they have different file paths.
+
+6.u+sx,o-w means that the user will be able to set user or group ID on execution and execute (or search for directories). The other users in the file's group will not be able to write on the file. All other permissions previously given will remain the same.
+
+7. To find the all directories modified within the last 4 weeks, I used:
+      	       man find (to learn more about the find command)
+	       find /usr/local/bin -type d -mtime -28 (d because we are looking for directories,28 becasue 4 weeks is 28 days)
+
+8. There are 302 symbolic links in the same directory as find. The commands I used:
+   	     whereis find (to find path of find)
+	     man find (to learn more about find)
+	     man wc (to learn more about wc)
+	     find /usr/bin -type l | wc -l (to find directories in same directory as find and print out number of directories)
+
+9. The oldest regular file in /usr/lib64 is librom1394.so.0.3.0. We know it is the oldest because it shows up last when listed in order of last modified. It is a regular file because the first character in the long listing is a "-". I used the commands:
+       	      man ls
+	      cd /usr/lib64
+	      ls -lt
+
+10. The locale command displays the current locale settings for each locale category based on the settings of the environment variable that control the locale. localedef defines the locale environment. The commands I used:
+    	       man locale (to learn more about locale command)
+	       man -k locale (to learn that localedef defines the locale environment)
+
+11. The following have downcase in their command name:
+    	downcase-region               C-x C-l
+  	 Convert the region to lower case.  In programs, wants two arguments.
+	downcase-word                 M-l
+  	 Convert following word (or ARG words) to lower case, moving over.
+	 
+     To find these commands, I used;
+     	C-h (to learn more about emacs)
+	C-h a downcase	 
+
+12. C-M-r runs the command isearch-backward-regexp, which is an interactive compiled Lisp function.
+    C-M-v runs the command scroll-other-window, which is an interactive built-in function in 'C source code'.
+    	  Commands used:
+	  	   C-h k C-M-r
+		   C-h k C-M-v
+
+
+13. C-g runs the command keyboard-quit, which is an interactive compiled Lisp function. Quitting with 'C-g' is the way to get rid of a partially typed command, or a numeric argument that you don't want.  Furthermore, if you are in the middle of a command that is running, 'C-g' stops the command in a relatively safe way.  For example, if you quit out of a kill command that is taking a long time, either your text will _all_ still be in the buffer, or it will _all_ be in the kill ring, or maybe both.  If the region is active, 'C-g' deactivates the mark, unless Transient Mark
+mode is off (see Disabled Transient Mark).  If you are in the middle of an incremental search, 'C-g' behaves specially; it may take two successive 'C-g' characters to get out of a search.  See Incremental Search, for details.
+     	Commands used:
+		 C-h k C-g
+		 C-h K C-g
+
+14. "Yanking" means reinserting text previously killed. The usual way to move or copy text is to kill it and then yank it elsewhere. To invoke yank, you must enter C-y. Commands used:
+    	      C-h F yank
+
+15. The difference between ls -l and emacs dired command is that the ls -l lists the contents of the directory using a long listing format. Using the dired command, the just the names of the contents of the directory are listed.
+    commands (for ls -l):
+    	     cd /usr/bin
+    	     ls -l
+    commands for emacs:
+    	     C-x C-d backspace backspace /usr/bin

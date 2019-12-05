@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# assigns directory as variable from input
+directory=$1
+
+# lists insides of directory and sorts alphabetically
+insides=$( ls -a $directory | sort )
+
+# separates files based on new line character, not space
+IFS=$'\n'
+
+#declare array to store regular files
+declare -a ARRAY
+
+#declare array to store files w dot
+declare -a DOTARRAY
+
+#declare counter for array
+let i=0
+
+#declare counter for array of names with .
+let j=0
+
+#time to loop through insides
+for FILE in $insides
+do
+  	#if its not readable, print error
+        if [ ! -r "$directory/$FILE" ]
+        then
+            	echo "Error: $directory/$FILE not Readable"
+                continue
+        fi
+	#if it is a file and not a symbolic link and not directory, then store in array
+        if [ -f "$directory/$FILE" ]
+        then
+            	if [ -L "$directory/$FILE" ] || [ -d "$directory/$FILE" ]
+                then
+                    	continue
+                elif [ "${FILE:0:1}" == "." ]
+                then
+                    	DOTARRAY[$j]="$directory/$FILE"
+                        let j=j+1
+                else
+                        ARRAY[$i]="$directory/$FILE"
+                        let i=i+1
+                fi
+        fi
+done
+
+#ARRAY is full of regular files without .
+
+#DOTARRAY is full of regular files with .
+
+# time to loop through ARRAY for duplicates
+DOTARRAY=( "${DOTARRAY[@]}" "${ARRAY[@]}" )
+
+for FILE1 in "${DOTARRAY[@]}"
+do
+	echo "$FILE1"
+done

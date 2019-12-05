@@ -1,0 +1,155 @@
+Khoi Nguyen 
+#########
+lab.txt
+
+First to start the assignment, I created the one file we needed
+to complete, using the command:
+nano tr2b.c
+
+For this file, I added the include statements for the libraries
+I needed to import. After that, I added a helper function that
+consisted of a nested for loop that one through each character
+and returned 0 if there were any of the same characters in the 
+'from' string. In the main, I checked for invalid number of 
+arguments. After, I checked if the lengths of the two input
+strings were the same. Finally, I read each character for 
+the standard input and checked if it matched any of the 
+characters in the from string. If it did, putchar the 
+corresponding to character. If the character from the input
+did not match any character in from string, then putchar 
+that character. Finally if there were any errors in reading
+from the stdin, print the error and exit.
+
+Next, I made a duplicate of tr2b.c because tr2u.c is similar 
+in structure:
+cp tr2b.c tr2u.c
+nano tr2u.c
+
+In this file, I editted the character getting functions to use
+read and instead of getchar and switched putchar with write.
+Furthermore, I removed the final if statement because the 
+program did not use stdin like tr2b.c. I changed fprintf
+to write for errors.
+
+Next, to make the 5,000,000 file, I used the command:
+head --bytes=5000000 /dev/urandom > output.txt
+
+Next, we compare the strace function when copying file to another:
+strace -c ./tr2b 'AB' 'XY' < output.txt > tr2bStrace.txt
+
+This produced:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 24.55    0.000027           3         9           mmap
+ 16.36    0.000018           5         4           mprotect
+ 10.91    0.000012          12         1           write
+ 10.00    0.000011           6         2           read
+  9.09    0.000010           3         4           fstat
+  8.18    0.000009           5         2           open
+  8.18    0.000009           9         1           munmap
+  4.55    0.000005           5         1         1 access
+  4.55    0.000005           5         1           execve
+  1.82    0.000002           1         2           close
+  0.91    0.000001           1         1           brk
+  0.91    0.000001           1         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000110                    29         1 total
+
+with 29 system calls.
+
+Next command of copying:
+strace -c ./tr2u 'AB' 'XY' < output.txt > tr2uStrace.txt
+
+the output was this, using 10000024 system calls.
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.42   25.486269           5   5000000           write
+ 44.58   20.499455           4   5000002           read
+  0.00    0.000318         159         2           fstat
+  0.00    0.000046           7         7           mmap
+  0.00    0.000031           8         4           mprotect
+  0.00    0.000017           9         2           open
+  0.00    0.000012          12         1           munmap
+  0.00    0.000008           4         2           close
+  0.00    0.000008           8         1         1 access
+  0.00    0.000007           7         1           execve
+  0.00    0.000004           4         1           brk
+  0.00    0.000003           3         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   45.986178              10000024         1 total
+
+
+Next, we do the same without placing the output into a file:
+
+strace -c ./tr2u 'AB' 'XY' < output.txt
+
+had the output of the same amount of calls as before, 10000024.
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.05   25.954210           5   5000000           write
+ 44.95   21.192189           4   5000002           read
+  0.00    0.000022           6         4           mprotect
+  0.00    0.000017           2         7           mmap
+  0.00    0.000012          12         1           munmap
+  0.00    0.000004           2         2           close
+  0.00    0.000004           4         1           arch_prctl
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00   47.146458              10000024         1 total
+
+strace -c ./tr2b 'AB' 'XY' < output.txt
+The output was below with 34 calls:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 30.46    0.000053           9         6           write
+ 20.69    0.000036           4         9           mmap
+ 13.22    0.000023           6         4           mprotect
+  6.32    0.000011           6         2           open
+  5.75    0.000010           5         2           read
+  5.75    0.000010          10         1           execve
+  5.17    0.000009           2         4           fstat
+  5.17    0.000009           9         1           munmap
+  2.87    0.000005           5         1           brk
+  2.87    0.000005           5         1         1 access
+  1.15    0.000002           1         2           close
+  0.57    0.000001           1         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000174                    34         1 total
+
+Next, to measure time, I used the command
+time ./tr2b 'AB' 'XY' < output.txt > tr2bTime.txt
+
+output of:
+real	0m0.004s
+user	0m0.000s
+sys	0m0.001s
+
+time ./tr2u 'AB' 'XY' < output.txt > tr2uTime.txt
+
+output of:
+real	0m10.851s
+user	0m1.235s
+sys	0m9.549s
+
+time ./tr2b 'AB' 'XY' <	output.txt
+
+output of:
+real	0m0.002s
+user	0m0.000s
+sys	0m0.001s
+
+time ./tr2u 'AB' 'XY' < output.txt
+
+output of:
+real	0m9.057s
+user	0m1.293s
+sys	0m7.752s
+
+With both time and calls compared, the buffered I/O is much faster
+than the unbuffered I/O. Much less read/write calls are called by the
+buffered I/O.

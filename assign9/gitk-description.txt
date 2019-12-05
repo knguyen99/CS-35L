@@ -1,0 +1,16 @@
+Khoi Nguyen
+804993073
+gitk-description.txt
+
+Upper Left Window: Shows the commit history with all past commits. They 
+are labeled by the a short commit message.
+
+Upper Middle Window: Shows the name and the email of the author of the commit.
+
+Upper Right Window: Shows the date and time for the corresponding commit.
+
+Bottom Right Window: Shows the files that were altered in the commit.
+
+Bottom Left Window: Shows author, committer, parent, branches, child,
+and commit message. Below that is each file that was changed in the commit, and
+shows what changed through a diff file format.

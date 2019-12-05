@@ -1,0 +1,27 @@
+#!/bin/bash
+
+grep -o '<td>.*<\/td>' |
+
+sed 's/<[^>]*>//g' |
+
+sed '/^\s*$/d' |
+
+sed -n '2~2p' |
+
+sed 's/^\s*//g' |
+
+sed 's/\s*$//g' |
+
+tr '\ ' '\n' |
+
+tr -d ',?' |
+
+sed "s/\`/'/g" |
+
+tr [:upper:] [:lower:] |
+
+tr -cs "pk\'mnwlhaeiou" "\n" |
+
+sed '/^\s*$/d' |
+
+sort -u

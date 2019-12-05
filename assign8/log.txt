@@ -1,0 +1,153 @@
+Khoi Nguyen 
+#########
+log.txt
+
+First, I plugged my BeagleBone into my computer. I found
+the BeagleBone as an external storage device on my computer
+and opened "START.htm". As the manual stated, I downloaded
+the network and serial drivers from the BeagleBone website.
+Because my computer is running a newer Mac OS X, I needed to
+download another driver from piazza. I then ran:
+sudo rm -rf /System/Library/Extensions/HoRNDIS.kext
+
+and reset my computer.
+
+Next I went into terminal to SSH to my BeagleBone:
+sudo ssh root@192.168.7.2
+
+I then had to enter my system password. 
+Next we run the following commands to connect to the BeagleBone
+network:
+sudo connmanctl (to open connmanctl terminal)
+connmanctl> enable wifi (to enable wifi)
+connmanctl> scan wifi (to scan for available access points)
+connmanctl> services (to display discovered access points)
+
+the following line is the access point I need to connect to:
+UCLA_WEB             wifi_2cf7f1069882_55434c415f574542_managed_none
+
+Next commands:
+connmanctl> agent on (to register as prospective client)
+connmanctl> connect wifi_2cf7f1069882_55434c415f574542_managed_none
+
+I did not need a password to connect to the access point thus, I am ready to quit.
+
+connmanctl> quit
+
+Next, I need to find the IP address:
+ifconfig
+
+The output is:
+SoftAp0   Link encap:Ethernet  HWaddr c4:f3:12:a4:35:3c  
+          inet addr:192.168.8.1  Bcast:192.168.8.255  Mask:255.255.255.0
+          inet6 addr: fe80::c6f3:12ff:fea4:353c/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:7131 errors:0 dropped:7 overruns:0 frame:0
+          TX packets:10071 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1412389 (1.3 MiB)  TX bytes:11741184 (11.1 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:1641 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1641 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:167750 (163.8 KiB)  TX bytes:167750 (163.8 KiB)
+
+usb0      Link encap:Ethernet  HWaddr c4:f3:12:a4:35:30  
+          inet addr:192.168.7.2  Bcast:192.168.7.255  Mask:255.255.255.0
+          inet6 addr: fe80::c6f3:12ff:fea4:3530/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:4648 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2284 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:476756 (465.5 KiB)  TX bytes:430526 (420.4 KiB)
+
+wlan0     Link encap:Ethernet  HWaddr 2c:f7:f1:06:98:82  
+          inet addr:172.29.31.155  Bcast:172.29.31.255  Mask:255.255.252.0
+          inet6 addr: fe80::2ef7:f1ff:fe06:9882/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST DYNAMIC  MTU:1500  Metric:1
+          RX packets:321 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1230 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:88042 (85.9 KiB)  TX bytes:737131 (719.8 KiB)
+
+My IP address is 172.29.31.155.
+
+Next I need to update my database of apt-get:
+sudo apt-get update
+Now, I need to install xauth and xvfb for X11 forwarding support for future SSH 
+connections to my beaglebone using the commands:
+sudo apt-get install xauth
+sudo apt-get install xvfb
+
+Next, I need to check that X11 is enables. I used the commands:
+nano /etc/ssh/ssh_config
+nano /etc/ssh/sshd_config
+
+and edit the files such that X11Forwarding, ForwardAgent, and ForwardX11
+ was set to yes. 
+
+Next I need to install firefox on my beaglebone using the command:
+sudo apt-get install firefox-esr-l10n-en-gb
+
+Next I need to make sure that openssh-server and openssh-client
+are downloaded, using the commands:
+sudo apt-get install openssh-server
+sudo apt-get install openssh-client
+
+Now is the time I work with my partner Elwyn. 
+Becasue we are in the dorms, we had to connect to my hotspot.
+I used the commands:
+sudo connmanctl
+connmanctl> scan wifi
+connmanctl> services
+connmanctl> agent on
+connmanctl> connect wifi_2cf7f1069882_4b686f69e2809973206950686f6e65_managed_psk
+connmanctl> quit
+ifconfig (to get my new IP address)
+
+I will be the server and she will be the client. 
+
+Generate public and private keys:
+ssh-keygen
+
+To create an account for Julia:
+sudo useradd -d /home/532 -m julia
+sudo passwd julia 
+     (create a password for julia's account)
+To create a .ssh directory for Julia:
+cd /home/cs
+sudo mkdir .ssh
+
+And finally change ownership and permission on .ssh directory:
+sudo chown -R julia .ssh
+sudo chmod 700 .ssh
+
+I will be the client and she will be the server.
+
+Generate public and private keys:
+ssh-keygen
+
+Next, to copy the public key into Julia's server:
+ssh-copy-id -i khoi@172.20.10.5
+
+Add private key to authentication agent:
+ssh-add
+
+Now to ssh to his server with option -X to allow
+for X11 session forwarding:
+ssh -X khoi@172.20.10.5
+
+I was able to ssh without a password, thus accomplished goal.
+
+I tested the command:
+touch test.txt
+
+And this created a file in the server that both me
+and Julia could see. Next we tested the command:
+xterm
+
+And a new shell window appeared.

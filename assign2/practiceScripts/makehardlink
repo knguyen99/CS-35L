@@ -1,0 +1,5 @@
+file1=$1
+file2=$2
+
+rm $file2
+ln -f -- $file1 $file2

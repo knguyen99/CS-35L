@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# assigns directory as variable from input
+dir=$1
+
+IFS=$'\n'
+
+insides=$( ls -a $dir | sort )
+
+for FILE in $insides
+do
+	echo "$dir/$FILE"
+done

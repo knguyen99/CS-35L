@@ -1,0 +1,225 @@
+Khoi Nguyen	
+#########
+Lab4.txt
+
+To get the file corrupt coreutils file, I used
+wget http://web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils-with-bug.tar.gz
+
+To unzip, I used:
+tar -xf coreutils-with-bug.tar.gz
+where -xvzf means extract all files from zip
+
+To find out how to configure then configure:
+cd coreutils-with-bug
+ls
+nano INSTALL
+./configure
+
+After configuring the file, to build the script:
+make 
+
+However the script did not build correctly. It threw out this execption:
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+make[3]: *** [utimecmp.o] Error 1
+make[3]: Leaving directory `/w/home.11/ce/ugrad/nguyenk/cs35l/assign4/coreutils-with-bug/lib'
+make[2]: *** [all] Error 2
+make[2]: Leaving directory `/w/home.11/ce/ugrad/nguyenk/cs35l/assign4/coreutils-with-bug/lib'
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory `/w/home.11/ce/ugrad/nguyenk/cs35l/assign4/coreutils-with-bug'
+make: *** [all] Error 2
+
+This stated that there were two declarations for the same function. Thus, there are two conflicting
+functions which is not legal.
+
+Because the make did not work, I deleted the old coreutils file and reunzipped
+the zip file. The commands I used were:
+cd ..
+rm -rf coreutils-with-bug
+tar -xvzf coreutils-with-bug.tar.gz
+cd coreutils-with-bug
+
+To have a location for the program to install I made a directory inside
+using the command:
+mkdir coreutilsDir
+
+Next, to download the patch, I used:
+wget http://web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils.diff
+
+To apply the patch, I used:
+patch -p0 < coreutils.diff
+-p0 is the option to give the entiere filename unmodified
+
+To configure the program:
+./configure --prefix=/u/ce/ugrad/nguyenk/cs35l/assign4/coreutils-with-bug/coreutilsDir
+
+After the patch was applied, I recompiled the program:
+make
+
+It compiled correctly, thus I was able to install with:
+make install
+
+The patch worked in this file because when you look into the patch file
+using nano coreutils.diff, you can see that the edit was renaming 
+the function futimens to coreutils_futimens, thus no overlapping function
+names.
+
+To test the bug, we use the given commands from the assignment:
+tmp=$(mktemp -d)
+cd $tmp
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+	The output from this is:
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-02 20:39:14.647110648 +0000 now1
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-02 20:38:55.801788296 +0000 now
+-rw-r--r-- 1 nguyenk ceugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice 
+
+The bug was not created using these commands, thus I used the absolute path 
+of the buggy ls:
+TZ=UTC0 ~/cs35l/assign4/coreutils-with-bug/coreutilsDir/bin/ls -lt --full-time wwi-armistice now now1
+
+	The output is now:
+-rw-r--r-- 1 nguyenk ceugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-02 20:44:12.427204137 +0000 now1
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-02 20:44:01.958025066 +0000 now
+
+To delete the temporary directory:
+cd 
+rm -rf $tmp
+
+I realized that to run gdb, I was going to need those files again
+thus I ran the commands
+tmp=$(mktemp -d)
+cd $tmp
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+cd 
+cd cs35l/assign4/coreutils-with-bug
+
+To get the name of the temporary directory, I ran:
+echo $tmp
+Which gave me:
+/tmp/tmp.8ocyLaWjfg
+
+To run gdb on the buggy ls, I ran:
+gdb src/ls
+
+Now I have entered gdb with the buggy ls.
+
+To find out what functions could contain the bug, I ran the command:
+(gdb) info functions
+
+One of the functions, compare_mtime(V, V), looked like it could
+be the cause of the issue. Thus, I set a breakpoint at that function:
+(gdb) break compare_mtime
+
+To run the debugger on the specific inputs, I ran:
+(gdb) run -lt --full-time /tmp/tmp.8ocyLaWjfg
+
+Next, I ran the command:
+list
+To get the source code for the function. In the compare_mtime function
+the function timespec_cmp is called. Thus I needed to step into the 
+compare_mtime function to learn more about the timespec_cmp function.
+
+Next commands:
+(gdb) si
+(gdb) list
+
+The folowing is the source code for the timespec_cmp function located
+in lib/timespec.h:
+Assume the nanosecond components are in range, or close to it.  */
+45	static inline int
+46	timespec_cmp (struct timespec a, struct timespec b)
+47	{
+48	  int diff = a.tv_sec - b.tv_sec;
+49	  return diff ? diff : a.tv_nsec - b.tv_nsec;
+50	}
+
+In this function, you can see that the subtraction is the issue. When
+two dates are really far apart from each other, overflow can occur, which
+wraps around and provides the wrong number for the if then else statement.
+
+From here, we are done with gdb, thus we can run 
+(gdb) q
+to quit.
+
+Next we need to fix the timespec.h file. First we make a copy of 
+timespec.h and place it in the outside coreutils-with-bug folder.
+cp lib/timespec.h timespec.h
+
+To edit that file:
+emacs timespec.h
+
+Instead of using the subtraction comparison, we can literally use <,>,=
+to compare dates. Thus I editted the function timespec_cmp.
+After, I needed to log the changes in ChangeLog entry using the commands:
+C-x 4 a
+(type the entry)
+C-x C-c
+y
+y
+
+To add the ChangeLog to the diff file:
+cat ChangeLog > lab4.diff
+
+After modifying the copied timespec.h file, we need to make a diff file
+so that we can apply it as a patch. I used the commands:
+diff -u lib/timespec.h timespec.h >> lab4.diff
+
+We need to edit the diff file so that it has the correct file path for the 
+edit so I used:
+nano lab4.diff
+(add lib/ to timespec.h's path)
+
+Next, to apply the patch:
+patch -p0 < lab4.diff
+
+Time to test!!
+To reconfigure, build, and install:
+./configure --prefix=/u/ce/ugrad/nguyenk/cs35l/assign4/coreutils-with-bug/coreutilsDir
+make
+make install
+
+To test if the output is right, I ran:
+cd $tmp
+TZ=UTC0 ~/cs35l/assign4/coreutils-with-bug/coreutilsDir/bin/ls -lt --full-time wwi-armistice now now1 
+
+Which gave the output of 
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-02 20:44:12.427204137 +0000 now1
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-02 20:44:01.958025066 +0000 now
+-rw-r--r-- 1 nguyenk ceugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+
+
+Trying in the home directory, I used the commands:
+cd
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+TZ=UTC0 ~/cs35l/assign4/coreutils-with-bug/coreutilsDir/bin/ls -lt --full-time wwi-armistice now now1
+
+And the output was:
+-rw-r--r-- 1 nguyenk ceugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-04 01:17:31.193843000 +0000 now1
+-rw-r--r-- 1 nguyenk ceugrad 0 2018-11-04 01:17:24.814025000 +0000 now
+
+Seasnet did not do what it was supposed to so it did not do well. The file wwi-armistice was set
+with the date November 11th 1918 however the Seasnet system centers time around the
+UNIX Epoch time ( January 1st 1970 at 00:00:00 ). Any file with a date before the Epoch time
+will wrap around to a future date. Since the wwi-armistice file had such an early date and 
+the NFS filesystem uses unsigned timestamps, the negative timestamp of wwi-armistice is converted
+to much larger positive number, or a timestamp in the future.

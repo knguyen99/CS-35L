@@ -1,0 +1,235 @@
+Khoi Nguyen 
+804993073
+Assignment 2
+
+Started this assingment by checking if I was in the standard C.
+Becasue I wasnt, I ran the command export LC_ALL='C' in order to 
+change the LC_CTYPE to "C".
+
+Next, I ran the command sort /usr/share/dict/words > words. This 
+followed the path to the file words, sorted the contents to 
+alphabetical order, then saved the output back into the file.
+
+I then called wget 
+http://web.cs.ucla.edu/classes/fall18/cs35L/assign/assign2.html 
+to get the bring the html onto the linux server.
+
+tr -c 'A-Za-z' '[\n*]' < assign2.html
+This command translates all non-alphabetical characters into new line 
+characters.
+The -c means complement, thus is the reverse of 'A-Za-z'.
+
+tr -cs 'A-Za-z' '[\n*]' < assign2.html
+This command also translates all non-alphabetical characters into new line 
+except
+with the s added after c, if two or more non-alphabetical characters are next 
+to 
+each other, it is treated as one character so only one new line is added.	
+
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort
+This command is similar to above except the output sorts the words in 
+alphabetical
+order.
+
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u
+This command is similar to above except the output removes words that are 
+exactly 
+the same so that every word in the list is only printed once. 'w' and 'W' are 
+considered
+two different words, thus is case sensitive.
+
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm - words
+This command produces a 3 column output that compares the output from the 
+command
+above with the words file. Words that appear in assign2.html and not in words 
+are in 
+column 1. Words that solely appear in words are in column 2. Words that appear 
+in 
+both files are in column 3.
+
+tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm -23 - words
+This command suppresses columns 2 and 3 from the output of the command above. 
+This 
+outputs words that are unique to assign2.html and not in words.
+
+I next ran the command wget http://mauimapp.com/moolelo/hwnwdseng.htm to bring 
+the 
+page to the linux server.
+
+Creating the script:
+
+specifying to be run with bash
+#!/bin/bash
+
+This extracts the words from the table from the html. All words in the table are
+contained in <td>something</td>.
+grep -o '<td>.*<\/td>' |
+
+After extracting the words from the table, this command removes the html 
+comments,
+as provided by TA. The g mean global so it look over the entire line instead of 
+just the first occurance, the s means replace and we are replaceing the html 
+comment
+with nothing.
+sed 's/<[^>]*>//g' |
+
+This command deletes empty lines in the file, teh ^ means starts with and teh $
+mean ends with. 
+sed '/^\s*$/d' |
+
+The result of above is an alternating list of english and hawaiian words. The 
+hawaiian words come second so we remove every other line starting at line 2.
+sed -n '2~2p' |
+
+This command removes leading spaces, as provided by the TA.
+sed 's/^\s*//g' |
+
+This command removes trailing spaces, I altered it by adding the $ which means
+ends with.
+sed 's/\s*$//g' |
+
+This command translates every space to a new line so that each line is only a 
+word 
+and not a phrase.
+tr '\ ' '\n' |
+
+This command deletes characters ',' and '?'
+tr -d ',?' |
+
+This command replaces the hawaiian character with a single quote.
+sed "s/\`/'/g" |
+
+This command translates upper case letters to lower case letters.
+tr [:upper:] [:lower:] |
+
+This command replaces words that have any non-hawaiian characters with new line.
+tr -cs "pk\'mnwlhaeiou" "\n" |
+
+This command removes blank lines as before.
+sed '/^\s*$/d' |
+
+This sorts the list in alphabetical order and removes duplicates.
+sort -u
+
+Running the Script:
+
+First, I had to make buildwords executeable, so I called the command
+chmod +x buildwords
+
+Then to compile the hwords file, I called. This takes hwnwdseng.htm as the 
+input and uses it when executing buildwords, and puts the output in hwords.
+cat hwnwdseng.htm | ./buildwords > hwords
+
+This command takes assign2 as the input, translates all uppercase letters to 
+lowercase letters
+turns non alphabetical characters to new line characters, removes blank lines, 
+then sorts 
+and removes duplicates, compares with words,  and put words unique to 
+assign2.html into misEng.
+cat assign2.html | tr [:upper:] [:lower:] | tr -cs 'A-Za-z' '\n' | sed 
+'/^\s*$/d' | sort -u | comm -23 - words > misEng
+
+This command counts the lines of misEng
+wc -l misEng
+
+There are 38 mispelled English words.
+
+To compare with the hawaiin dictionary, change comm -23 - words to comm -23 - 
+hwords, making the command
+cat assign2.html | tr [:upper:] [:lower:] | tr -cs 'A-Za-z' '\n' | sed 
+'/^\s*$/d' | sort -u | comm -23 - hwords > misHaw
+
+To count the lines
+wc -l misHaw
+
+There are 405 mispelled words using the Hawaiian dictionary. This accounts for 
+all words in assign2.html that include 
+illegal characters. If you wanted to check for hawaiian words that spelled 
+incorrectly, you would add 
+tr -cs "pk\'mnwlhaeiou" "\n" in order to turn words with these letters in to 
+new lines. This would give a different value.
+
+To check how many mispelled english but not hawaiian, you would use the command 
+cat misEng | comm -12 - hwords > misEnghwords
+wc -l misEnghwords
+
+There are 3 misspelled English words but correctly spelled hawaiian words:
+halau
+lau 
+wiki
+
+To check how many mispelled hawaiian words but not english, 
+cat misHaw | comm -12 - words > misHawwords
+wc -l misHawwords
+
+There are 370 misspelled hawaiian words but correctly spelled english words, 
+these are some examples:
+a
+able
+about
+above
+abovementioned
+accent
+address
+after
+afterwards
+against
+all
+also
+an
+and
+any
+apostrophe
+are
+argument
+arguments
+as
+ascii
+assign
+assignment
+assume
+assumption
+attempt
+
+To check how many words are incorrectly spelled in both english and hawaiian, 
+the commands I ran were:
+cat misHaw | comm -12 - misEng > misBoth
+wc -l misBoth
+
+There are 35 words mispelled in both english and hawaiian. These words are:
+basedefs
+buildwords
+charset
+cmp
+ctype
+doctype
+eggert
+eword
+href
+htm
+html
+http
+hwnwdseng
+hword
+hwords
+idx
+linux
+mauimapp
+moolelo
+ndash
+okina
+onlinepubs
+opengroup
+posix
+sameln
+seasnet
+td
+toc
+ul
+usr
+utf
+vandebogart
+wget
+wikipedia
+www
+

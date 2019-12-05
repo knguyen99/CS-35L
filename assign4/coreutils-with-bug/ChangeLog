@@ -1,0 +1,9 @@
+2018-11-03  Khoi Vu Nguyen  <nguyenk@lnxsrv09.seas.ucla.edu>
+
+	* timespec.h: 
+	(timespec_cmp): Fixed the comparison by removing the subtraction between a.tv_sec and b.tv_sec and instead
+	comparing their actual values using >,==,<. If a.tv_sec < b.tv_sec, return -1. If a.tv_sec == b.tv_sec, then
+	return 0, meaning that the times are the same. If the a is neither less than b or equal to b's time, then it 
+	is greater than b's time, thus return 1. This fixes the overflow issue that the previous version had since we
+	do not have to deal with subtraction of possibly two times that are very far apart.
+

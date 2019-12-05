@@ -1,0 +1,37 @@
+Khoi Nguyen
+#########
+hw.txt
+
+1) If the other teams had been observing all the bytes going across
+the network, the resulting network would still be secure, and the data
+would be uncompromised. This is because of the asymmetric key encryption.
+Asymmetric key encryption encrypts messages with the recipient's public key
+however in order to decrypt the text, only the recipient's private key 
+works. After asymmetric key encryption, the data is then encrypted through
+symmetric key encryption, using a session key. Either way, without the 
+private key, the data cannot be decrypted.
+
+	(1) If the other teams had tapped our keyboards, our data 
+	may be compromised. This is because if they record our keystrokes,
+	they know our passphrase and any other inputs. Although they may
+	not be able to decrypt files since they do not have the private key,
+	they still are able to access our files using the passphrase. 
+	
+	(2) With physical access to the USB, the network and data are not
+	secure. If the other teams had access to the USB, then they have
+	control to the files on the BeagleBone including the .ssh files.
+	Inside the .ssh files, they will be able to access public/private
+	key pairings, and thus decrypt any file.
+
+
+2) gpg2 --verify does verify the owner of the file, but instead compares
+the decrypted cleartext signature with the decrypted message, using the 
+public key. An attacker can intercept a message and modifies the
+signature such that the signature states a different owner. Thus, the 
+command doesn't really verify the owner since someone can change the
+signature. It just checks that the detached signature and file match.
+
+A simple fix for this is to have a reliable third party organization 
+to keep track of the author of the file and the data before modification.
+This would keep track of the people who modified the file and would make
+it easier to catch if an attacker modified the file. 
